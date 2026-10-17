@@ -1,0 +1,735 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=auto" />
+  <meta name="theme-color" content="#f5f6fa" />
+  <title>GabGe — Finanças Pessoais</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='24' fill='%235146d8'/%3E%3Ctext x='50' y='68' text-anchor='middle' font-family='Arial,sans-serif' font-size='58' font-weight='700' fill='white'%3EG%3C/text%3E%3C/svg%3E" />
+  <link rel="stylesheet" href="css/estilo.css" />
+  <link rel="stylesheet" href="css/redesign.css?v=20261016-15" />
+</head>
+<body>
+
+  <!-- ======================= TELA DE AUTENTICAÇÃO ======================= -->
+  <main id="tela-auth" class="tela-auth" hidden>
+    <div class="cartao-auth">
+      <div class="marca-auth">
+        <span class="marca-auth__icone">💰</span>
+        <h1>Controle Financeiro</h1>
+        <p>Suas finanças, do computador ao celular.</p>
+      </div>
+
+      <div class="abas-auth" role="tablist">
+        <button type="button" class="abas-auth__botao is-ativo" data-aba="entrar" role="tab" aria-selected="true">Entrar</button>
+        <button type="button" class="abas-auth__botao" data-aba="criar" role="tab" aria-selected="false">Criar conta</button>
+      </div>
+
+      <form id="form-entrar" class="form-auth" novalidate>
+        <label class="campo">
+          <span>E-mail</span>
+          <input type="email" name="email" autocomplete="email" required />
+        </label>
+        <label class="campo">
+          <span>Senha</span>
+          <input type="password" name="senha" autocomplete="current-password" required />
+        </label>
+        <p class="erro-auth" data-erro-para="entrar" role="alert"></p>
+        <button type="submit" class="botao botao--primario botao--bloco">Entrar</button>
+      </form>
+
+      <form id="form-criar" class="form-auth" novalidate hidden>
+        <label class="campo">
+          <span>Seu nome</span>
+          <input type="text" name="nome" autocomplete="name" required />
+        </label>
+        <label class="campo">
+          <span>E-mail</span>
+          <input type="email" name="email" autocomplete="email" required />
+        </label>
+        <label class="campo">
+          <span>Senha (mínimo 6 caracteres)</span>
+          <input type="password" name="senha" autocomplete="new-password" minlength="6" required />
+        </label>
+        <p class="erro-auth" data-erro-para="criar" role="alert"></p>
+        <button type="submit" class="botao botao--primario botao--bloco">Criar conta</button>
+      </form>
+
+      <p class="aviso-auth" data-aviso-confirmacao hidden>
+        Conta criada! Verifique seu e-mail para confirmar o cadastro antes de entrar
+        <span> — se o seu Supabase estiver com confirmação de e-mail desativada, já pode entrar direto.</span>
+      </p>
+    </div>
+  </main>
+
+  <!-- ============================ APP PRINCIPAL =========================== -->
+  <div id="app" class="app" hidden>
+
+    <!-- Barra lateral (desktop) / barra inferior (celular) -->
+    <nav class="barra-lateral" id="barra-lateral">
+      <div class="barra-lateral__marca">
+        <span class="barra-lateral__icone">G</span>
+        <span class="barra-lateral__titulo">GabGe<span class="barra-lateral__subtitulo">FINANÇAS PESSOAIS</span></span>
+      </div>
+
+      <button type="button" class="item-nav is-ativo" data-pagina="dashboard">
+        <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="3.5" width="7" height="7" rx="1.5"/><rect x="3.5" y="13.5" width="7" height="7" rx="1.5"/><rect x="13.5" y="13.5" width="7" height="7" rx="1.5"/></svg>
+        <span class="item-nav__texto">Visão geral</span>
+      </button>
+      <button type="button" class="item-nav" data-pagina="lancamentos">
+        <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>
+        <span class="item-nav__texto">Lançamentos</span>
+      </button>
+      <button type="button" class="item-nav" data-pagina="historico">
+        <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M7 4v16m0-16-3 3m3-3 3 3m7 13V4m0 16-3-3m3 3 3-3"/></svg>
+        <span class="item-nav__texto">Histórico</span>
+      </button>
+      <button type="button" class="item-nav" data-pagina="compartilhado">
+        <svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span class="item-nav__texto">Compartilhado</span>
+      </button>
+
+      <div class="barra-lateral__rodape">
+        <span class="barra-lateral__rotulo">Usuário atual</span>
+        <strong id="rodape-nome-usuario">—</strong>
+        <button type="button" id="botao-sair" class="link-rodape"><svg class="ui-icon ui-icon--inline" aria-hidden="true" viewBox="0 0 24 24"><path d="M10 17l5-5-5-5m5 5H3"/><path d="M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6"/></svg><span>Sair</span></button>
+      </div>
+    </nav>
+
+    <!-- ============================ PÁGINA: LANÇAMENTOS ============================ -->
+    <section class="pagina" data-pagina="lancamentos" hidden>
+      <header class="pagina__cabecalho pagina__cabecalho--flex">
+        <div>
+          <span class="redesign-eyebrow">Organize entradas e saídas</span>
+          <h1>Lançamentos</h1>
+          <p>Registre uma movimentação e acompanhe o mês.</p>
+        </div>
+        <button type="button" id="botao-novo-lancamento" class="botao botao--primario" data-abrir-form-lancamento><svg class="ui-icon ui-icon--inline" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Novo lançamento</span></button>
+      </header>
+
+      <div class="grade-lancamentos">
+        <details id="painel-formulario-lancamento" class="cartao cartao--formulario" open>
+          <summary class="cabecalho-formulario">
+            <span><span class="redesign-eyebrow">Lançamento</span><strong id="titulo-form-lancamento">Novo Lançamento</strong><small>Data, descrição, categoria, conta e valor</small></span>
+            <span class="indicador-detalhes" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span>
+          </summary>
+
+          <form id="form-lancamento" novalidate>
+            <input type="hidden" name="id_em_edicao" value="" />
+
+            <label class="campo">
+              <span>Data do lançamento</span>
+              <input type="date" name="data" required />
+            </label>
+
+            <label class="campo">
+              <span>Descrição</span>
+              <input type="text" name="descricao" placeholder="Ex: Supermercado, Salário" required />
+            </label>
+
+            <label class="campo">
+              <span>Tipo</span>
+              <select name="tipo" required>
+                <option value="Despesa">Despesa</option>
+                <option value="Receita">Receita</option>
+              </select>
+            </label>
+
+            <label class="campo campo--com-acao">
+              <span>
+                Categoria
+                <button type="button" id="botao-gerenciar-categorias" class="link-inline"><svg class="ui-icon ui-icon--inline" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 2.94-.09-.02a1.7 1.7 0 0 0-1.72.67l-.05.08h-3.4l-.05-.08a1.7 1.7 0 0 0-1.72-.67l-.09.02-1.7-2.94.06-.06A1.7 1.7 0 0 0 9.7 15l-.08-.05v-3.4l.08-.05a1.7 1.7 0 0 0-.34-1.88l-.06-.06L11 6.62l.09.02a1.7 1.7 0 0 0 1.72-.67l.05-.08h3.4l.05.08a1.7 1.7 0 0 0 1.72.67l.09-.02 1.7 2.94-.06.06a1.7 1.7 0 0 0-.34 1.88l.08.05v3.4z" transform="translate(-2 -2) scale(1.17)"/></svg><span>Gerenciar</span></button>
+              </span>
+              <select name="categoria" required></select>
+            </label>
+
+            <label class="campo campo--com-acao">
+              <span>
+                Conta
+                <button type="button" id="botao-gerenciar-contas" class="link-inline"><svg class="ui-icon ui-icon--inline" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 2.94-.09-.02a1.7 1.7 0 0 0-1.72.67l-.05.08h-3.4l-.05-.08a1.7 1.7 0 0 0-1.72-.67l-.09.02-1.7-2.94.06-.06A1.7 1.7 0 0 0 9.7 15l-.08-.05v-3.4l.08-.05a1.7 1.7 0 0 0-.34-1.88l-.06-.06L11 6.62l.09.02a1.7 1.7 0 0 0 1.72-.67l.05-.08h3.4l.05.08a1.7 1.7 0 0 0 1.72.67l.09-.02 1.7 2.94-.06.06a1.7 1.7 0 0 0-.34 1.88l.08.05v3.4z" transform="translate(-2 -2) scale(1.17)"/></svg><span>Gerenciar</span></button>
+              </span>
+              <select name="conta_id" required></select>
+            </label>
+
+            <label class="campo">
+              <span>Valor (R$)</span>
+              <input type="text" name="valor" inputmode="decimal" placeholder="0,00" required />
+            </label>
+
+            <div class="opcao-fixa" id="campo-fixa">
+              <label class="opcao-fixa__check">
+                <input type="checkbox" name="fixa" />
+                <span><svg class="ui-icon ui-icon--inline" aria-hidden="true" viewBox="0 0 24 24"><path d="M20 7v5h-5M4 17v-5h5"/><path d="M5.6 9a7 7 0 0 1 11.55-2.1L20 12M4 12l2.85 5.1A7 7 0 0 0 18.4 15"/></svg> Despesa fixa — repetir todo mês</span>
+              </label>
+              <p class="opcao-fixa__dica">Será lançada automaticamente nos meses seguintes, no mesmo dia e com o mesmo valor.</p>
+            </div>
+            <button type="button" id="botao-gerenciar-fixas" class="link-inline link-inline--bloco"><svg class="ui-icon ui-icon--inline" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06-1.7 2.94-.09-.02a1.7 1.7 0 0 0-1.72.67l-.05.08h-3.4l-.05-.08a1.7 1.7 0 0 0-1.72-.67l-.09.02-1.7-2.94.06-.06A1.7 1.7 0 0 0 9.7 15l-.08-.05v-3.4l.08-.05a1.7 1.7 0 0 0-.34-1.88l-.06-.06L11 6.62l.09.02a1.7 1.7 0 0 0 1.72-.67l.05-.08h3.4l.05.08a1.7 1.7 0 0 0 1.72.67l.09-.02 1.7 2.94-.06.06a1.7 1.7 0 0 0-.34 1.88l.08.05v3.4z" transform="translate(-2 -2) scale(1.17)"/></svg><span>Gerenciar despesas fixas</span></button>
+
+            <p class="erro-form" data-erro-para="lancamento" role="alert"></p>
+
+            <div class="linha-botoes">
+              <button type="submit" id="botao-salvar-lancamento" class="botao botao--primario"><svg class="ui-icon ui-icon--inline" aria-hidden="true" viewBox="0 0 24 24"><path d="M5 4h12l3 3v13H4V4z"/><path d="M8 4v6h8V4M8 20v-6h8v6"/></svg><span>Salvar Lançamento</span></button>
+              <button type="button" id="botao-limpar-lancamento" class="botao botao--secundario">Limpar</button>
+              <button type="button" id="botao-cancelar-edicao" class="botao botao--secundario" hidden>Cancelar edição</button>
+            </div>
+          </form>
+        </details>
+
+        <div class="cartao cartao--lista">
+          <div class="cabecalho-lista">
+            <div><span class="redesign-eyebrow">Movimentação mensal</span><h2>Lançamentos do mês</h2></div>
+            <div class="seletor-mes">
+              <button type="button" id="botao-mes-anterior" class="seletor-mes__seta" aria-label="Mês anterior">‹</button>
+              <select id="select-mes-lista" aria-label="Mês"></select>
+              <select id="select-ano-lista" aria-label="Ano"></select>
+              <button type="button" id="botao-mes-proximo" class="seletor-mes__seta" aria-label="Próximo mês">›</button>
+            </div>
+          </div>
+
+          <div class="resumo-mes">
+            <div><span>Receitas</span><strong class="valor-receita" id="resumo-mes-receita">R$ 0,00</strong></div>
+            <div><span>Despesas</span><strong class="valor-despesa" id="resumo-mes-despesa">R$ 0,00</strong></div>
+            <div><span>Saldo</span><strong id="resumo-mes-saldo">R$ 0,00</strong></div>
+          </div>
+
+          <div class="tabela-scroll">
+            <table class="tabela" id="tabela-recentes">
+              <thead>
+                <tr><th>Data</th><th>Descrição</th><th>Conta</th><th>Tipo</th><th class="col-num">Valor</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p class="estado-vazio" data-vazio-para="recentes" hidden>Nenhum lançamento neste mês.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================ PÁGINA: DASHBOARD ============================ -->
+    <section class="pagina" data-pagina="dashboard">
+      <header class="pagina__cabecalho pagina__cabecalho--flex">
+        <div>
+          <span class="redesign-eyebrow" id="data-dashboard">Acompanhe suas finanças</span>
+          <h1>Visão geral</h1>
+          <p>Resumo do mês, movimentações e análise financeira.</p>
+        </div>
+        <div class="cabecalho-dashboard-acoes">
+          <label class="campo campo--mes">
+            <span>Mês</span>
+            <select id="select-mes-dashboard" aria-label="Mês do resumo"></select>
+          </label>
+          <label class="campo campo--ano">
+            <span>Ano de referência</span>
+            <select id="select-ano-dashboard"></select>
+          </label>
+          <button type="button" class="botao botao--primario" data-abrir-form-lancamento><svg class="ui-icon ui-icon--inline" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Novo lançamento</span></button>
+        </div>
+      </header>
+
+      <div class="grade-kpis">
+        <div class="cartao cartao--kpi">
+          <span class="kpi__rotulo">Receitas no mês</span>
+          <strong class="kpi__valor kpi__valor--receita" id="kpi-receita">R$ 0,00</strong>
+          <small class="kpi__nota">Entradas no período</small>
+        </div>
+        <div class="cartao cartao--kpi">
+          <span class="kpi__rotulo">Despesas no mês</span>
+          <strong class="kpi__valor kpi__valor--despesa" id="kpi-despesa">R$ 0,00</strong>
+          <small class="kpi__nota">Saídas no período</small>
+        </div>
+        <div class="cartao cartao--kpi">
+          <span class="kpi__rotulo">Saldo do mês</span>
+          <strong class="kpi__valor kpi__valor--saldo" id="kpi-saldo">R$ 0,00</strong>
+          <small class="kpi__nota">Receitas menos despesas</small>
+        </div>
+        <div class="cartao cartao--kpi">
+          <span class="kpi__rotulo">Margem poupada</span>
+          <strong class="kpi__valor kpi__valor--saldo" id="kpi-margem">0,0%</strong>
+          <small class="kpi__nota" id="kpi-margem-nota">Sobre as receitas do período</small>
+        </div>
+      </div>
+
+      <div class="dashboard-graficos">
+        <div class="cartao">
+          <div class="cabecalho-grafico-barras">
+            <div><h2 id="titulo-grafico-barras">Receitas vs Despesas</h2><p class="subtitulo-cartao">Movimento mensal do ano selecionado</p></div>
+            <span class="grafico-legenda"><i class="legenda-receita"></i>Receitas <i class="legenda-despesa"></i>Despesas</span>
+          </div>
+          <div class="grafico-wrap">
+            <canvas id="grafico-barras"></canvas>
+          </div>
+        </div>
+
+        <div class="cartao">
+          <div class="cabecalho-grafico-rosca">
+            <div><h2>Despesas por categoria</h2><p class="subtitulo-cartao">Distribuição do período escolhido</p></div>
+            <select id="select-mes-rosca" aria-label="Período das despesas por categoria">
+              <option value="todos">Todos (ano)</option>
+            </select>
+          </div>
+          <div class="grafico-wrap grafico-wrap--rosca">
+            <div class="lista-categorias-dashboard" id="lista-categorias-dashboard"></div>
+            <p class="estado-vazio" id="aviso-sem-despesas-rosca" hidden>Sem despesas no período selecionado.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="cartao cartao--recentes-dashboard">
+        <div class="cabecalho-lista">
+          <div><h2>Movimentações recentes</h2><p class="subtitulo-cartao">Lançamentos de <span id="rotulo-mes-recentes"></span>.</p></div>
+          <button type="button" class="botao botao--secundario" data-ir-pagina="historico">Ver histórico</button>
+        </div>
+        <div class="lista-recentes-dashboard" id="lista-recentes-dashboard"></div>
+        <p class="estado-vazio" id="aviso-sem-recentes-dashboard" hidden>Nenhum lançamento neste mês.</p>
+      </div>
+
+      <div class="cartao cartao--compartilhado" id="cartao-dashboard-compartilhado" hidden>
+        <div class="cabecalho-lista">
+          <h2><svg class="ui-icon ui-icon--inline" aria-hidden="true" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="10" cy="7" r="4"/><path d="M20 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg> Orçamento Compartilhado <span class="dica-desktop" id="dash-comp-grupo"></span></h2>
+          <button type="button" id="botao-ver-compartilhado" class="link-inline">Ver detalhes →</button>
+        </div>
+        <div class="resumo-mes">
+          <div><span>Seu saldo</span><strong id="dash-comp-saldo">R$ 0,00</strong><small id="dash-comp-saldo-texto"></small></div>
+          <div><span>Gasto do grupo (mês atual)</span><strong id="dash-comp-mes-total">R$ 0,00</strong></div>
+          <div><span>Sua parte (mês atual)</span><strong id="dash-comp-mes-minha">R$ 0,00</strong></div>
+        </div>
+        <ul class="lista-acertos" id="dash-comp-acertos"></ul>
+        <p class="estado-vazio estado-vazio--compacto estado-vazio--quite" id="dash-comp-quite" hidden><svg class="icone-status-quite" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16.5 9"/></svg><span>Tudo certo! Ninguém deve nada a ninguém</span></p>
+      </div>
+
+      <details class="dashboard-analises">
+        <summary><span><strong>Análises anuais e projeções</strong><small>Comparativos mensais, estimativas e resumo por conta</small></span><span class="indicador-detalhes" aria-hidden="true"><svg class="ui-icon" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg></span></summary>
+        <div class="dashboard-analises__conteudo">
+          <div class="grade-dashboard">
+            <div class="coluna-dashboard">
+              <div class="cartao">
+            <h2>Resumo Comparativo Mensal</h2>
+            <p class="subtitulo-cartao">Valores 100% reais, com base nos lançamentos cadastrados.</p>
+            <div class="tabela-scroll">
+              <table class="tabela" id="tabela-resumo">
+                <thead>
+                  <tr><th>Mês</th><th class="col-num">Receitas</th><th class="col-num">Despesas</th><th class="col-num">Saldo</th><th class="col-num">Margem</th></tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          </div>
+
+              <div class="cartao cartao--estimativa">
+            <h2><svg class="ui-icon ui-icon--inline" aria-hidden="true" viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-5 5"/><path d="M15 9h4v4"/></svg> Módulo de Estimativas</h2>
+            <p class="subtitulo-cartao">
+              Projeção dos próximos meses (média dos últimos 3 meses reais) —
+              separada da tabela acima de propósito, para nunca confundir estimativa com dado real.
+            </p>
+            <div class="tabela-scroll">
+              <table class="tabela" id="tabela-estimativas">
+                <thead>
+                  <tr><th>Mês</th><th class="col-num">Receita (est.)</th><th class="col-num">Despesa (est.)</th><th class="col-num">Saldo (est.)</th></tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+            <p class="texto-categorias-estimativa" id="texto-categorias-estimativa"></p>
+            <p class="estado-vazio" id="aviso-sem-estimativa" hidden>
+              Ainda não há histórico suficiente. Cadastre lançamentos de meses anteriores para habilitar as projeções.
+            </p>
+              </div>
+            </div>
+        </div>
+
+          <div class="cartao">
+        <h2>Resumo por Conta</h2>
+        <p class="subtitulo-cartao">
+          Quanto entrou e saiu de cada conta no ano selecionado (não é necessariamente o saldo real do banco,
+          já que o app não sabe o saldo inicial de cada conta — é só o movimento registrado aqui).
+        </p>
+        <div class="tabela-scroll">
+          <table class="tabela" id="tabela-resumo-contas">
+            <thead>
+              <tr><th>Conta</th><th>Banco</th><th class="col-num">Receitas</th><th class="col-num">Despesas</th><th class="col-num">Saldo</th></tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="estado-vazio" id="aviso-sem-contas" hidden>Nenhuma conta cadastrada ainda.</p>
+          </div>
+        </div>
+      </details>
+    </section>
+
+    <!-- ============================ PÁGINA: HISTÓRICO ============================ -->
+    <section class="pagina" data-pagina="historico" hidden>
+      <header class="pagina__cabecalho">
+        <span class="redesign-eyebrow">Encontre qualquer movimentação</span>
+        <h1>Histórico</h1>
+        <p>Busque, filtre, ordene, edite ou exclua qualquer lançamento.</p>
+      </header>
+
+      <div class="cartao">
+        <div class="historico-filtros-cabecalho"><div><span class="redesign-eyebrow">Refine os resultados</span><h2>Buscar e filtrar</h2></div></div>
+        <div class="grade-filtros">
+          <label class="campo">
+            <span>Buscar (descrição ou categoria)</span>
+            <input type="search" id="filtro-busca" placeholder="Digite para buscar…" />
+          </label>
+          <label class="campo">
+            <span>Ano</span>
+            <select id="filtro-ano"><option value="todos">Todos</option></select>
+          </label>
+          <label class="campo">
+            <span>Mês</span>
+            <select id="filtro-mes"><option value="todos">Todos</option></select>
+          </label>
+          <label class="campo">
+            <span>Tipo</span>
+            <select id="filtro-tipo">
+              <option value="todos">Todos</option>
+              <option value="Receita">Receita</option>
+              <option value="Despesa">Despesa</option>
+            </select>
+          </label>
+          <label class="campo">
+            <span>Conta</span>
+            <select id="filtro-conta"><option value="todos">Todas</option></select>
+          </label>
+          <button type="button" id="botao-limpar-filtros" class="botao botao--secundario">Limpar filtros</button>
+        </div>
+      </div>
+
+      <div class="cartao">
+        <div class="cabecalho-historico">
+          <h2>Histórico completo <span class="dica-desktop">(clique na coluna para ordenar)</span></h2>
+          <span class="contagem-historico" id="contagem-historico"></span>
+        </div>
+        <div class="tabela-scroll">
+          <table class="tabela tabela--historico" id="tabela-historico">
+            <thead>
+              <tr>
+                <th data-ordenar="data">Data</th>
+                <th data-ordenar="descricao">Descrição</th>
+                <th data-ordenar="tipo">Tipo</th>
+                <th data-ordenar="categoria">Categoria</th>
+                <th>Conta</th>
+                <th class="col-num" data-ordenar="valor">Valor</th>
+                <th class="col-acoes">Ações</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <p class="estado-vazio" data-vazio-para="historico" hidden>Nenhum lançamento encontrado com esses filtros.</p>
+      </div>
+    </section>
+
+    <!-- ============================ PÁGINA: COMPARTILHADO ============================ -->
+    <section class="pagina" data-pagina="compartilhado" hidden>
+      <header class="pagina__cabecalho">
+        <span class="redesign-eyebrow">Despesas do grupo</span>
+        <h1>Compartilhado</h1>
+        <p>Divida despesas com quem mora com você e acompanhe quem deve o quê.</p>
+      </header>
+
+      <div class="cartao" id="bloco-sem-grupo">
+        <h2>Você ainda não tem um grupo compartilhado</h2>
+        <p class="subtitulo-cartao">
+          Crie um grupo e convide as pessoas com quem você divide despesas
+          (elas precisam já ter uma conta neste app).
+        </p>
+        <form id="form-criar-grupo" novalidate>
+          <label class="campo">
+            <span>Nome do grupo</span>
+            <input type="text" name="nome" placeholder="Ex: Casa, República" value="Orçamento Compartilhado" />
+          </label>
+          <p class="erro-form" data-erro-para="criar-grupo" role="alert"></p>
+          <button type="submit" class="botao botao--primario"><svg class="ui-icon ui-icon--inline" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Criar grupo compartilhado</span></button>
+        </form>
+      </div>
+
+      <div id="bloco-com-grupo" hidden>
+        <div class="cartao">
+          <h2>Membros do grupo <span class="contagem-membros" id="contagem-membros-grupo"></span></h2>
+          <div class="tabela-scroll">
+            <table class="tabela" id="tabela-membros">
+              <thead><tr><th>Membro</th></tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <form id="form-adicionar-membro" class="form-adicionar-membro" novalidate>
+            <label class="campo">
+              <span>E-mail da pessoa (precisa já ter conta no app)</span>
+              <input type="email" name="email" placeholder="pessoa@exemplo.com" required />
+            </label>
+            <p class="erro-form" data-erro-para="adicionar-membro" role="alert"></p>
+            <button type="submit" class="botao botao--secundario"><svg class="ui-icon ui-icon--inline" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Adicionar por e-mail</span></button>
+          </form>
+        </div>
+
+        <div class="cartao">
+          <div class="compartilhado-resumo-cabecalho">
+            <div>
+              <span class="redesign-eyebrow">Resumo do grupo</span>
+              <h2 id="titulo-grupo">—</h2>
+              <p class="subtitulo-cartao">Saldos considerando todas as despesas e pagamentos registrados.</p>
+            </div>
+            <span class="estado-grupo" id="estado-grupo">Grupo ativo</span>
+          </div>
+          <h3 class="subtitulo-secao">Saldos do grupo</h3>
+          <div class="lista-saldos" id="lista-saldos"></div>
+          <div id="bloco-como-acertar">
+            <h3 class="subtitulo-secao">Como acertar</h3>
+            <ul class="lista-acertos" id="lista-acertos"></ul>
+          </div>
+          <p class="estado-vazio estado-vazio--compacto estado-vazio--quite" id="aviso-grupo-quite" hidden><svg class="icone-status-quite" aria-hidden="true" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16.5 9"/></svg><span>Tudo certo! Ninguém deve nada a ninguém</span></p>
+        </div>
+
+        <div class="cartao" id="cartao-pagamento">
+          <h2>Registrar pagamento</h2>
+          <p class="subtitulo-cartao">Use quando alguém quitar (total ou parcialmente) o que deve a outra pessoa.</p>
+          <form id="form-pagamento" novalidate>
+            <label class="campo">
+              <span>Quem pagou?</span>
+              <select name="de_user_id" required></select>
+            </label>
+            <label class="campo">
+              <span>Quem recebeu?</span>
+              <select name="para_user_id" required></select>
+            </label>
+            <label class="campo">
+              <span>Valor (R$)</span>
+              <input type="text" name="valor" inputmode="decimal" placeholder="0,00" required />
+            </label>
+            <label class="campo">
+              <span>Data</span>
+              <input type="date" name="data" required />
+            </label>
+            <label class="campo">
+              <span>Observação (opcional)</span>
+              <input type="text" name="observacao" placeholder="Ex: Pix, dinheiro" />
+            </label>
+            <p class="erro-form" data-erro-para="pagamento" role="alert"></p>
+            <button type="submit" class="botao botao--primario"><svg class="ui-icon ui-icon--inline" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M5 17v3h14v-3"/></svg><span>Registrar pagamento</span></button>
+          </form>
+        </div>
+
+        <div class="cartao">
+          <h2>Nova Despesa Compartilhada</h2>
+          <form id="form-despesa-compartilhada" novalidate>
+            <label class="campo">
+              <span>Descrição</span>
+              <input type="text" name="descricao" placeholder="Ex: Aluguel, Mercado" required />
+            </label>
+            <label class="campo">
+              <span>Valor total (R$)</span>
+              <input type="text" name="valor_total" inputmode="decimal" placeholder="0,00" required />
+            </label>
+            <label class="campo">
+              <span>Quem pagou?</span>
+              <select name="pago_por" required></select>
+            </label>
+            <label class="campo">
+              <span>Data</span>
+              <input type="date" name="data" required />
+            </label>
+            <label class="campo">
+              <span>Categoria (opcional)</span>
+              <input type="text" name="categoria" placeholder="Ex: Moradia" />
+            </label>
+
+            <div class="campo">
+              <span>Como dividir?</span>
+              <div class="opcoes-divisao">
+                <label><input type="radio" name="tipo_divisao" value="igual" checked /> Dividir igualmente</label>
+                <label><input type="radio" name="tipo_divisao" value="customizado" /> Valores customizados</label>
+              </div>
+            </div>
+
+            <div id="bloco-divisao-customizada" hidden></div>
+            <p class="dica-divisao" id="dica-soma-divisao"></p>
+
+            <p class="erro-form" data-erro-para="despesa-compartilhada" role="alert"></p>
+            <button type="submit" class="botao botao--primario"><svg class="ui-icon ui-icon--inline" aria-hidden="true" viewBox="0 0 24 24"><path d="M5 4h12l3 3v13H4V4z"/><path d="M8 4v6h8V4M8 20v-6h8v6"/></svg><span>Salvar Despesa</span></button>
+          </form>
+        </div>
+
+        <div class="cartao">
+          <div class="cabecalho-lista">
+            <h2>Despesas Compartilhadas</h2>
+            <div class="seletor-mes">
+              <button type="button" id="botao-mes-anterior-comp" class="seletor-mes__seta" aria-label="Mês anterior">‹</button>
+              <select id="select-mes-comp" aria-label="Mês"></select>
+              <select id="select-ano-comp" aria-label="Ano"></select>
+              <button type="button" id="botao-mes-proximo-comp" class="seletor-mes__seta" aria-label="Próximo mês">›</button>
+            </div>
+          </div>
+
+          <div class="resumo-mes resumo-mes--2">
+            <div><span>Total do mês</span><strong class="valor-despesa" id="resumo-comp-total">R$ 0,00</strong></div>
+            <div><span>Nº de despesas</span><strong id="resumo-comp-qtd">0</strong></div>
+          </div>
+
+          <div class="tabela-scroll">
+            <table class="tabela" id="tabela-despesas-compartilhadas">
+              <thead>
+                <tr><th>Data</th><th>Descrição</th><th>Pago por</th><th class="col-num">Valor</th><th class="col-acoes">Ações</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p class="estado-vazio" id="aviso-sem-despesas-compartilhadas" hidden>Nenhuma despesa compartilhada neste mês.</p>
+        </div>
+
+        <div class="cartao">
+          <h2>Pagamentos registrados</h2>
+          <div class="tabela-scroll">
+            <table class="tabela" id="tabela-pagamentos">
+              <thead>
+                <tr><th>Data</th><th>De</th><th>Para</th><th class="col-num">Valor</th><th>Obs.</th><th class="col-acoes">Ações</th></tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+          </div>
+          <p class="estado-vazio" id="aviso-sem-pagamentos" hidden>Nenhum pagamento registrado ainda.</p>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================ MODAL: CATEGORIAS ============================ -->
+  <div class="modal" id="modal-categorias" hidden>
+    <div class="modal__fundo" data-fechar-modal></div>
+    <div class="modal__caixa">
+      <div class="modal__cabecalho">
+        <h2>Gerenciar Categorias</h2>
+        <button type="button" class="modal__fechar" data-fechar-modal aria-label="Fechar"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="m18 6-12 12M6 6l12 12"/></svg></button>
+      </div>
+
+      <div class="tabela-scroll tabela-scroll--modal">
+        <table class="tabela" id="tabela-categorias">
+          <thead><tr><th>Nome</th><th>Tipo</th><th class="col-acoes">Ações</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <form id="form-categoria" class="form-categoria" novalidate>
+        <input type="hidden" name="nome_original" value="" />
+        <label class="campo">
+          <span>Nome da categoria</span>
+          <input type="text" name="nome" required />
+        </label>
+        <label class="campo">
+          <span>Tipo</span>
+          <select name="tipo">
+            <option value="Despesa">Despesa</option>
+            <option value="Receita">Receita</option>
+            <option value="Ambos">Ambos</option>
+          </select>
+        </label>
+        <p class="erro-form" data-erro-para="categoria" role="alert"></p>
+        <div class="linha-botoes">
+          <button type="submit" id="botao-adicionar-categoria" class="botao botao--primario"><svg class="ui-icon ui-icon--inline" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Adicionar</span></button>
+          <button type="button" id="botao-limpar-categoria" class="botao botao--secundario">Limpar campos</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================ MODAL: CONTAS ============================ -->
+  <div class="modal" id="modal-contas" hidden>
+    <div class="modal__fundo" data-fechar-modal></div>
+    <div class="modal__caixa">
+      <div class="modal__cabecalho">
+        <h2>Gerenciar Contas</h2>
+        <button type="button" class="modal__fechar" data-fechar-modal aria-label="Fechar"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="m18 6-12 12M6 6l12 12"/></svg></button>
+      </div>
+
+      <div class="tabela-scroll tabela-scroll--modal">
+        <table class="tabela" id="tabela-contas">
+          <thead><tr><th>Nome</th><th>Banco</th><th>Tipo</th><th class="col-acoes">Ações</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <form id="form-conta" class="form-categoria" novalidate>
+        <input type="hidden" name="id" value="" />
+        <label class="campo">
+          <span>Nome da conta</span>
+          <input type="text" name="nome" placeholder="Ex: Conta Corrente, Carteira" required />
+        </label>
+        <label class="campo">
+          <span>Banco (opcional)</span>
+          <input type="text" name="banco" placeholder="Ex: Nubank, Itaú, Caixa" />
+        </label>
+        <label class="campo">
+          <span>Tipo</span>
+          <select name="tipo">
+            <option value="Conta Corrente">Conta Corrente</option>
+            <option value="Poupança">Poupança</option>
+            <option value="Carteira">Carteira</option>
+            <option value="Investimento">Investimento</option>
+            <option value="Outro">Outro</option>
+          </select>
+        </label>
+        <p class="erro-form" data-erro-para="conta" role="alert"></p>
+        <div class="linha-botoes">
+          <button type="submit" id="botao-adicionar-conta" class="botao botao--primario"><svg class="ui-icon ui-icon--inline" aria-hidden="true" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg><span>Adicionar</span></button>
+          <button type="button" id="botao-limpar-conta" class="botao botao--secundario">Limpar campos</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================ MODAL: DESPESAS FIXAS ============================ -->
+  <div class="modal" id="modal-fixas" hidden>
+    <div class="modal__fundo" data-fechar-modal></div>
+    <div class="modal__caixa">
+      <div class="modal__cabecalho">
+        <h2>Despesas Fixas</h2>
+        <button type="button" class="modal__fechar" data-fechar-modal aria-label="Fechar"><svg class="ui-icon" aria-hidden="true" viewBox="0 0 24 24"><path d="m18 6-12 12M6 6l12 12"/></svg></button>
+      </div>
+      <p class="subtitulo-cartao">
+        Elas se repetem todo mês. Para criar uma nova, marque "Despesa fixa" ao cadastrar um lançamento.
+      </p>
+
+      <div class="tabela-scroll tabela-scroll--modal">
+        <table class="tabela" id="tabela-fixas">
+          <thead><tr><th>Descrição</th><th class="col-num">Valor</th><th>Dia</th><th class="col-acoes">Ações</th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <p class="estado-vazio" id="aviso-sem-fixas" hidden>Nenhuma despesa fixa cadastrada.</p>
+
+      <form id="form-fixa" class="form-categoria" novalidate hidden>
+        <input type="hidden" name="id" value="" />
+        <label class="campo">
+          <span>Descrição</span>
+          <input type="text" name="descricao" required />
+        </label>
+        <label class="campo">
+          <span>Categoria</span>
+          <select name="categoria" required></select>
+        </label>
+        <label class="campo">
+          <span>Conta</span>
+          <select name="conta_id" required></select>
+        </label>
+        <label class="campo">
+          <span>Valor (R$)</span>
+          <input type="text" name="valor" inputmode="decimal" placeholder="0,00" required />
+        </label>
+        <p class="subtitulo-cartao">A alteração vale para este mês e os próximos. Meses anteriores não mudam.</p>
+        <p class="erro-form" data-erro-para="fixa" role="alert"></p>
+        <div class="linha-botoes">
+          <button type="submit" class="botao botao--primario"><svg class="ui-icon ui-icon--inline" aria-hidden="true" viewBox="0 0 24 24"><path d="M5 4h12l3 3v13H4V4z"/><path d="M8 4v6h8V4M8 20v-6h8v6"/></svg><span>Salvar alteração</span></button>
+          <button type="button" id="botao-cancelar-fixa" class="botao botao--secundario">Cancelar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ============================ TOASTS (feedback) ============================ -->
+  <div class="toasts" id="toasts" aria-live="polite"></div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
